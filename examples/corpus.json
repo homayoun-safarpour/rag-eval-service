@@ -1,0 +1,20 @@
+{
+  "docs": [
+    {
+      "id": "refund-policy",
+      "text": "Customers may request a full refund within 30 days of purchase if the product is unused. Shipping fees are non-refundable after delivery."
+    },
+    {
+      "id": "shipping-sla",
+      "text": "Standard shipping arrives in 5 to 7 business days. Express shipping arrives in 2 business days within the continental US."
+    },
+    {
+      "id": "password-reset",
+      "text": "To reset a password, open account settings, choose security, then send reset link. The link expires after 24 hours."
+    },
+    {
+      "id": "privacy-retention",
+      "text": "We retain account logs for 90 days. Billing records are kept for seven years to meet tax requirements."
+    }
+  ]
+}

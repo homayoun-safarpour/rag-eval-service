@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "id": "q-refund",
+      "query": "How do I get a refund for an unused product?",
+      "relevant_ids": ["refund-policy"],
+      "answer": "Request a full refund within 30 days if the product is unused."
+    },
+    {
+      "id": "q-shipping",
+      "query": "How fast is express shipping in the US?",
+      "relevant_ids": ["shipping-sla"],
+      "answer": "Express shipping arrives in 2 business days within the continental US."
+    },
+    {
+      "id": "q-password",
+      "query": "Password reset link expiry",
+      "relevant_ids": ["password-reset"],
+      "answer": "The reset link expires after 24 hours."
+    }
+  ]
+}
