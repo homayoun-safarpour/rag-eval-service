@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rag-eval-service"
-version = "0.1.0"
-description = "FastAPI service that scores RAG retrieval quality and fails CI when metrics drop below a frozen baseline."
+version = "0.2.0"
+description = "RAG ingestion, retrieval, generation, evaluation, and frozen regression gates."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

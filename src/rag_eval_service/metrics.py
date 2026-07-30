@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
-from rag_eval_service.store import VectorStore, tokenize
+from rag_eval_service.store import VectorStoreProtocol, tokenize
 
 
 @dataclass(frozen=True)
@@ -69,7 +69,7 @@ def _faithfulness_proxy(answer: str, contexts: list[str]) -> float:
 
 
 def evaluate_cases(
-    store: VectorStore,
+    store: VectorStoreProtocol,
     cases: list[dict],
     k: int = 3,
 ) -> EvalReport:
@@ -81,8 +81,8 @@ def evaluate_cases(
         relevant = {str(x) for x in case.get("relevant_ids", [])}
         answer = str(case.get("answer", ""))
         ranked = store.search(query, k=k)
-        ranked_ids = [doc_id for doc_id, _ in ranked]
-        contexts = [store.docs[doc_id] for doc_id in ranked_ids if doc_id in store.docs]
+        ranked_ids = [item.doc_id for item in ranked]
+        contexts = [item.text for item in ranked]
         hit, mrr = _hit_and_mrr(ranked_ids, relevant)
         prec = _precision(ranked_ids, relevant)
         faith = _faithfulness_proxy(answer, contexts) if answer else 1.0

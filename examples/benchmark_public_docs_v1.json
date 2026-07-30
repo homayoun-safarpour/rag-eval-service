@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "engine": "deterministic-sparse-v1",
+  "python": "3.13.2",
+  "documents": 12,
+  "queries": 8,
+  "k": 3,
+  "warmup_ms": 0.8041,
+  "runs": 500,
+  "latency_ms": {
+    "mean": 0.7178,
+    "p95": 1.0192,
+    "max": 2.9041
+  },
+  "metrics": {
+    "hit_at_k": 1.0,
+    "mrr": 1.0,
+    "context_precision": 0.3333333333333333,
+    "faithfulness_proxy": 0.9109623015873016
+  }
+}

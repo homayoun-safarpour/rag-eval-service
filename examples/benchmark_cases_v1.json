@@ -1,0 +1,52 @@
+{
+  "cases": [
+    {
+      "id": "request-validation",
+      "query": "Which framework validates JSON request bodies and reports invalid input?",
+      "relevant_ids": ["fastapi-validation"],
+      "answer": "FastAPI validates JSON request bodies and reports invalid input."
+    },
+    {
+      "id": "api-schema",
+      "query": "How is an OpenAPI schema generated from routes?",
+      "relevant_ids": ["fastapi-openapi"],
+      "answer": "FastAPI generates OpenAPI from declared routes and data models."
+    },
+    {
+      "id": "auth-dependency",
+      "query": "What mechanism declares shared authentication requirements?",
+      "relevant_ids": ["fastapi-dependencies"],
+      "answer": "Dependency injection declares shared authentication requirements."
+    },
+    {
+      "id": "persistent-vectors",
+      "query": "Where can vectors and metadata be persisted on disk?",
+      "relevant_ids": ["qdrant-persistence"],
+      "answer": "Qdrant persists vector collections and payload metadata on disk."
+    },
+    {
+      "id": "metadata-filter",
+      "query": "How can vector results be constrained using metadata fields?",
+      "relevant_ids": ["qdrant-filtering"],
+      "answer": "Payload filters constrain search using metadata fields."
+    },
+    {
+      "id": "corpus-hash",
+      "query": "Which Python module provides SHA-256 content fingerprints?",
+      "relevant_ids": ["python-hashlib"],
+      "answer": "Python hashlib provides SHA-256 content fingerprints."
+    },
+    {
+      "id": "http-stdlib",
+      "query": "Which standard library module sends HTTP requests without another package?",
+      "relevant_ids": ["python-urllib"],
+      "answer": "urllib.request sends HTTP requests without another package."
+    },
+    {
+      "id": "asgi-server",
+      "query": "Which server runs Python ASGI web applications?",
+      "relevant_ids": ["uvicorn-asgi"],
+      "answer": "Uvicorn runs Python ASGI web applications."
+    }
+  ]
+}

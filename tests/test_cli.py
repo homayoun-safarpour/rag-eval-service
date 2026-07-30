@@ -54,3 +54,35 @@ def test_cli_freeze_and_check_pass(tmp_path: Path):
     )
     assert check.returncode == 0, check.stdout + check.stderr
     assert "PASS" in check.stdout
+
+
+def test_cli_benchmark_writes_metrics_and_latency_evidence(tmp_path: Path):
+    output = tmp_path / "benchmark.json"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "rag_eval_service.cli",
+            "benchmark",
+            "--corpus",
+            str(ROOT / "examples" / "benchmark_corpus_v1.json"),
+            "--cases",
+            str(ROOT / "examples" / "benchmark_cases_v1.json"),
+            "--out",
+            str(output),
+            "--k",
+            "3",
+            "--runs",
+            "5",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    evidence = json.loads(output.read_text(encoding="utf-8"))
+    assert evidence["documents"] == 12
+    assert evidence["queries"] == 8
+    assert evidence["metrics"]["hit_at_k"] == 1.0
+    assert evidence["latency_ms"]["p95"] >= 0.0

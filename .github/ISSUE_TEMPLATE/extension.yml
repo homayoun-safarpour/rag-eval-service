@@ -1,0 +1,38 @@
+name: Store, generator, or judge extension
+description: Propose a bounded extension backed by a named contract test
+title: "[extension] "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: contract
+    attributes:
+      label: Contract
+      options:
+        - Vector store
+        - Generator
+        - Judge
+        - Benchmark loader
+        - Deployment control
+    validations:
+      required: true
+  - type: textarea
+    id: failure
+    attributes:
+      label: Production failure addressed
+      description: Describe the concrete failure this extension detects or prevents.
+    validations:
+      required: true
+  - type: textarea
+    id: proof
+    attributes:
+      label: Named proof
+      description: Name the test and reproducible command that prove the claim.
+    validations:
+      required: true
+  - type: textarea
+    id: offline
+    attributes:
+      label: Offline behavior
+      description: Explain how ordinary CI remains deterministic and credential-free.
+    validations:
+      required: true

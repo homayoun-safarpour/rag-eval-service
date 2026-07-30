@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import sys
+import time
 from pathlib import Path
 
 from rag_eval_service.baseline import (
@@ -28,7 +30,7 @@ def _store_from_corpus(corpus: dict) -> VectorStore:
     return store
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:  # noqa: PLR0915
     parser = argparse.ArgumentParser(
         prog="rag-eval",
         description="Score RAG retrieval fixtures and gate on a frozen baseline.",
@@ -54,11 +56,20 @@ def main(argv: list[str] | None = None) -> int:
     ch.add_argument("--baseline", required=True)
     ch.add_argument("--k", type=int, default=3)
 
+    bench = sub.add_parser("benchmark", help="run a pinned retrieval benchmark")
+    bench.add_argument("--corpus", required=True)
+    bench.add_argument("--cases", required=True)
+    bench.add_argument("--out", required=True)
+    bench.add_argument("--k", type=int, default=3)
+    bench.add_argument("--runs", type=int, default=100)
+
     args = parser.parse_args(argv)
     corpus = _load_json(args.corpus)
     cases = _load_json(args.cases)["cases"]
     store = _store_from_corpus(corpus)
+    started = time.perf_counter()
     report = evaluate_cases(store, cases, k=args.k)
+    elapsed = time.perf_counter() - started
     payload = report.to_dict()
 
     if args.cmd == "evaluate":
@@ -77,6 +88,37 @@ def main(argv: list[str] | None = None) -> int:
         baseline = freeze_baseline(payload, store.docs, tolerance=args.tolerance)
         write_baseline(args.out, baseline)
         print(f"wrote baseline -> {args.out}")
+        return 0
+
+    if args.cmd == "benchmark":
+        latencies_ms: list[float] = []
+        for _ in range(max(1, args.runs)):
+            run_started = time.perf_counter()
+            evaluate_cases(store, cases, k=args.k)
+            latencies_ms.append((time.perf_counter() - run_started) * 1_000)
+        latencies_ms.sort()
+        index_95 = min(len(latencies_ms) - 1, int(len(latencies_ms) * 0.95))
+        artifact = {
+            "schema_version": 1,
+            "engine": "deterministic-sparse-v1",
+            "python": platform.python_version(),
+            "documents": store.count(),
+            "queries": len(cases),
+            "k": args.k,
+            "warmup_ms": round(elapsed * 1_000, 4),
+            "runs": len(latencies_ms),
+            "latency_ms": {
+                "mean": round(sum(latencies_ms) / len(latencies_ms), 4),
+                "p95": round(latencies_ms[index_95], 4),
+                "max": round(max(latencies_ms), 4),
+            },
+            "metrics": {
+                key: payload[key]
+                for key in ("hit_at_k", "mrr", "context_precision", "faithfulness_proxy")
+            },
+        }
+        Path(args.out).write_text(json.dumps(artifact, indent=2) + "\n", encoding="utf-8")
+        print(f"wrote benchmark -> {args.out}")
         return 0
 
     baseline = load_baseline(args.baseline)

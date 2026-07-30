@@ -1,0 +1,64 @@
+{
+  "dataset": {
+    "name": "public-ai-infrastructure-docs-v1",
+    "description": "Small retrieval fixture derived from public project documentation.",
+    "pinned_on": "2026-08-04",
+    "sources": [
+      "https://github.com/fastapi/fastapi/tree/0.116.1",
+      "https://github.com/qdrant/qdrant/tree/v1.15.3",
+      "https://github.com/python/cpython/tree/v3.12.11",
+      "https://github.com/encode/uvicorn/tree/0.35.0"
+    ],
+    "claim": "Project regression fixture, not a standard leaderboard or representative RAG benchmark."
+  },
+  "docs": [
+    {
+      "id": "fastapi-validation",
+      "text": "FastAPI reads request bodies as JSON, converts types, validates data, and returns clear errors when input is invalid."
+    },
+    {
+      "id": "fastapi-openapi",
+      "text": "FastAPI generates an OpenAPI schema and interactive API documentation from declared routes and data models."
+    },
+    {
+      "id": "fastapi-dependencies",
+      "text": "FastAPI dependency injection lets route operations declare shared requirements such as authentication and database access."
+    },
+    {
+      "id": "qdrant-persistence",
+      "text": "Qdrant stores vectors with payload metadata and persists collections on disk for later search."
+    },
+    {
+      "id": "qdrant-filtering",
+      "text": "Qdrant payload filters can constrain vector search by metadata fields before results are returned."
+    },
+    {
+      "id": "qdrant-distance",
+      "text": "Qdrant collections configure vector size and a distance function such as cosine similarity."
+    },
+    {
+      "id": "python-hashlib",
+      "text": "Python hashlib provides secure hash algorithms including SHA-256 for stable content fingerprints."
+    },
+    {
+      "id": "python-urllib",
+      "text": "Python urllib.request opens URLs and sends HTTP requests without an additional package."
+    },
+    {
+      "id": "python-dataclasses",
+      "text": "Python dataclasses generate methods for classes that primarily store typed data."
+    },
+    {
+      "id": "uvicorn-asgi",
+      "text": "Uvicorn is an ASGI web server implementation for running Python asynchronous web applications."
+    },
+    {
+      "id": "uvicorn-workers",
+      "text": "Uvicorn supports worker processes and production process-manager configurations."
+    },
+    {
+      "id": "uvicorn-health",
+      "text": "Container health probes should check whether the application can serve requests, not only whether its process exists."
+    }
+  ]
+}

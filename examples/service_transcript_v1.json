@@ -1,0 +1,34 @@
+{
+  "command": "python scripts/run_example.py",
+  "captured_on": "2026-08-04",
+  "ingest": {
+    "sources": 1,
+    "chunks": 1,
+    "chunk_ids": [
+      "runbook::chunk-0000"
+    ]
+  },
+  "query": {
+    "query": "What does the readiness check verify?",
+    "contexts": [
+      {
+        "id": "runbook::chunk-0000",
+        "text": "Readiness checks verify the vector store before traffic is served. Health checks only verify that the API process is alive.",
+        "score": 0.38575837490522974,
+        "metadata": {
+          "source": "operations-runbook",
+          "source_id": "runbook",
+          "chunk_index": 0
+        }
+      }
+    ],
+    "answer": "Readiness checks verify the vector store before traffic is served.",
+    "generator": "extractive-v1",
+    "evaluation": {
+      "backend": "lexical-v1",
+      "score": 1.0,
+      "passed": true,
+      "rationale": "1.000 of unique answer tokens are supported by retrieved context"
+    }
+  }
+}

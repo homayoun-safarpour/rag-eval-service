@@ -60,6 +60,14 @@ def test_check_refuses_when_corpus_fingerprint_mismatches():
     assert baseline["corpus_sha256"] != corpus_fingerprint(store.docs)
 
 
+def test_check_fails_closed_when_baseline_is_missing():
+    store, cases = _load_fixtures()
+    report = evaluate_cases(store, cases, k=2).to_dict()
+    verdict = check_against_baseline(report, store.docs, None)
+    assert verdict.status == "MISSING_BASELINE"
+    assert verdict.exit_code == 2
+
+
 def test_fastapi_evaluate_and_health():
     client = TestClient(app)
     assert client.get("/health").json()["status"] == "ok"

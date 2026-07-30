@@ -19,3 +19,20 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check src tests
       - run: pytest -q
+      - name: Dogfood frozen retrieval gate
+        run: >-
+          rag-eval check
+          --corpus examples/corpus.json
+          --cases examples/cases.json
+          --baseline examples/baseline_v1.json
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose
+        run: docker compose config --quiet
+      - name: Build non-root API image
+        run: docker build -t rag-eval-service:ci .
+      - name: Verify image user
+        run: test "$(docker run --rm rag-eval-service:ci id -u)" = "10001"
