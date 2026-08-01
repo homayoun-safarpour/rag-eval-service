@@ -164,7 +164,9 @@ a small regression fixture, not a standard field leaderboard.
 ## CI and extension points
 
 GitHub Actions runs ruff, pytest, and `rag-eval check` on Python 3.10, 3.11, and
-3.12. A separate job validates Compose, builds the image, and asserts UID `10001`.
+3.12. A separate job starts the Compose stack, asserts UID `10001`, and exercises
+ingestion, Qdrant payload persistence, retrieval, generation, and judging through
+the containerized API.
 
 Extension interfaces:
 

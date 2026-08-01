@@ -7,7 +7,7 @@
   missing baseline, corpus drift, offline judge, and regression exit code.
 - [x] `python scripts/run_example.py` reproduces the committed service transcript.
 - [x] README-only fresh-clone path is under 30 minutes and needs no paid API.
-- [x] Non-root Docker image and Compose topology are declared and CI-built.
+- [x] Non-root Compose stack is CI-built and smoke-tested through Qdrant.
 - [x] `rag-eval check` dogfoods the frozen baseline in CI.
 - [x] Public-doc retrieval fixture and 500-run report are committed under `examples/`.
 - [x] `docs/INTERVIEW.md` carries three questions, a two-minute path, and limitations.
