@@ -1,11 +1,11 @@
 {
   "version": 1,
   "tolerance": 0.05,
-  "corpus_sha256": "85fc3932e3867e0f51ba903cab8c89475d6604a935677de9e45b5ef64ff95a0b",
+  "corpus_sha256": "5af4602093823da67103c746d0cb6fcd3b17f529f7889a95b0d58d0fe7407513",
   "metrics": {
     "hit_at_k": 1.0,
     "mrr": 1.0,
     "context_precision": 0.3333333333333333,
-    "faithfulness_proxy": 1.0
+    "faithfulness_proxy": 0.9464285714285714
   }
 }
