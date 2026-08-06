@@ -1,34 +1,9 @@
-# Interview gate: rag-eval-service
+﻿# Interview talking points — rag-eval-service
 
-## Three questions
+Five CLI-backed points for a technical screen (no resume recap).
 
-1. **Why pin `corpus_sha256` on the baseline?**
-   Without it, someone can swap the knowledge base, keep the same case IDs, and make hit@k look fine while answering from different content. Fingerprint mismatch forces an intentional re-freeze.
-
-2. **Why use a hashing embedder with Qdrant?**
-   It gives the persistent path stable vector dimensions and no model-download dependency. It proves the adapter, persistence, and deployment contracts. It does not make a semantic-retrieval claim.
-
-3. **What does the lexical judge measure without an LLM?**
-   Lexical grounding: share of answer tokens that appear in retrieved context. It is a CI-cheap signal, not a substitute for a judge model on open-ended answers.
-
-## Two-minute path
-
-```bash
-git clone https://github.com/homayoun-safarpour/rag-eval-service
-cd rag-eval-service
-pip install -e ".[dev]"
-python scripts/run_example.py
-rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
-  --baseline examples/baseline_v1.json
-pytest -q
-```
-
-Expect a context, grounded extractive answer, lexical pass, `verdict: PASS`, and a
-green suite including `test_query_path_returns_context_answer_and_offline_evaluation`.
-
-## Limitations
-
-- Hashing embeddings favor deterministic lexical retrieval over semantic recall.
-- The rate limiter is per process, not shared across replicas.
-- The optional LLM judge is a plugin. Default CI does not validate a provider,
-  model version, calibration set, or cost budget.
+- **`python scripts/run_example.py`** — ingests the bundled corpus, runs `/query`, prints contexts, extractive answer, and lexical evaluation with no model download.
+- **`rag-eval evaluate --corpus examples/corpus.json --cases examples/cases.json --json`** — aggregate retrieval metrics on disk; use before you freeze a baseline.
+- **`rag-eval freeze --corpus examples/corpus.json --cases examples/cases.json --out /tmp/baseline.json`** — writes hit@k floors plus `corpus_sha256` so later checks reject a swapped knowledge base.
+- **`rag-eval check --corpus examples/corpus.json --cases examples/cases.json --baseline examples/baseline_v1.json`** — exit **0** on pass, exit **2** when metrics fall below the frozen floor or corpus fingerprint mismatches.
+- **`pytest -q`** — named proofs include `test_check_detects_regression_below_floor`, `test_check_refuses_when_corpus_fingerprint_mismatches`, and offline `test_query_path_returns_context_answer_and_offline_evaluation`.
