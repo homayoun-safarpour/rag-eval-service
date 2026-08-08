@@ -1,4 +1,4 @@
-# rag-eval-service
+﻿# rag-eval-service
 
 **A RAG endpoint can stay healthy while retrieval quality, corpus identity, and answer grounding fail. This service turns those failures into tested API and CI contracts.**
 
@@ -46,6 +46,8 @@ are separate, so a production embedding model can replace it without changing AP
 or gate contracts.
 
 ## Install
+
+Interview pack: [docs/INTERVIEW.md](docs/INTERVIEW.md).
 
 Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
 
