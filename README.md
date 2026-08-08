@@ -47,6 +47,8 @@ or gate contracts.
 
 ## Install
 
+Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
+
 ```bash
 git clone https://github.com/homayoun-safarpour/rag-eval-service
 cd rag-eval-service
