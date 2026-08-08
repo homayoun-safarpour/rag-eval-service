@@ -79,14 +79,6 @@ verdict: PASS
   all metrics within tolerance of pinned baseline
 ```
 
-Fail-closed path (synthetic floors above the offline scores):
-
-```bash
-rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
-  --baseline examples/baseline_fail_demo.json
-# REGRESSION → exit 2 (see examples/baseline_fail_demo_OUTPUT.txt)
-```
-
 ## API
 
 Start the deterministic in-memory service:
@@ -203,6 +195,10 @@ See `CONTRIBUTING.md` for bounded extension tasks.
   detects judge drift on frozen anchors.
 - [agent-loop-engine](https://github.com/homayoun-safarpour/agent-loop-engine)
   can consume `rag-eval check` exit codes as a repair gate.
+
+## Field alignment
+
+Ireland AI-first QA language (golden floors, drift, offline eval) maps to `rag-eval check` exit codes. Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
 
 ## License
 
