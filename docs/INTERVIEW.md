@@ -7,3 +7,7 @@ Five CLI-backed points for a technical screen (no resume recap).
 - **`rag-eval freeze --corpus examples/corpus.json --cases examples/cases.json --out /tmp/baseline.json`** : writes hit@k floors plus `corpus_sha256` so later checks reject a swapped knowledge base.
 - **`rag-eval check --corpus examples/corpus.json --cases examples/cases.json --baseline examples/baseline_v1.json`** : exit **0** on pass, exit **2** when metrics fall below the frozen floor or corpus fingerprint mismatches.
 - **`pytest -q`** : named proofs include `test_check_detects_regression_below_floor`, `test_check_refuses_when_corpus_fingerprint_mismatches`, and offline `test_query_path_returns_context_answer_and_offline_evaluation`.
+
+## Related instruments
+
+- [judge-field-guide](https://github.com/homayoun-safarpour/judge-field-guide) - CI-tested map of the LLM-judge ecosystem
