@@ -199,6 +199,8 @@ See `CONTRIBUTING.md` for bounded extension tasks.
   detects judge drift on frozen anchors.
 - [agent-loop-engine](https://github.com/homayoun-safarpour/agent-loop-engine)
   can consume `rag-eval check` exit codes as a repair gate.
+- [judge-field-guide](https://github.com/homayoun-safarpour/judge-field-guide)
+  link-checked map of the LLM-judge tool ecosystem.
 
 ## Field alignment
 
