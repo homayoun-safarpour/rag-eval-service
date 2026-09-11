@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "python .cursor/hooks/hidden_rag_order_reminder.py",
+        "timeout": 8
+      }
+    ]
+  }
+}

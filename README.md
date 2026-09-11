@@ -1,21 +1,73 @@
-# rag-eval-service
+# rag-eval
 
-**A RAG endpoint can stay healthy while retrieval quality, corpus identity, and answer grounding fail. This service turns those failures into tested API and CI contracts.**
+**HTTP health is not retrieval health.**
 
 [![CI](https://github.com/homayoun-safarpour/rag-eval-service/actions/workflows/ci.yml/badge.svg)](https://github.com/homayoun-safarpour/rag-eval-service/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-`rag-eval-service` ingests and chunks documents, retrieves context, generates a
-grounded answer, evaluates that answer, and fails CI when frozen retrieval metrics
-regress. The ordinary path is deterministic and needs no model download or paid API.
+Frozen RAG eval gates and in-process categorized retrieve with injection drop.
+Repo slug `rag-eval-service`. CLI `rag-eval`. Python 3.10+.
 
-## The problem
+```bash
+git clone https://github.com/homayoun-safarpour/rag-eval-service
+cd rag-eval-service
+pip install -e ".[dev]"
+python scripts/run_example.py
+python scripts/run_hidden_rag.py
+```
+
+```bash
+rag-eval hidden-ask --pack examples/hidden_rag/pack.json \
+  --query "When are refunds issued?" --category support
+# exit 0 grounded; 1 injection blocked; 2 no category match
+```
+
+```python
+from rag_eval_service.hidden import HiddenRAG
+
+rag = HiddenRAG()
+rag.load_pack("examples/hidden_rag/pack.json")
+result = rag.ask("When are refunds issued?", "support")
+# result.exit_code, result.answer, result.prompt
+```
+
+```bash
+rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
+  --baseline examples/baseline_v1.json
+```
+
+```text
+verdict: PASS
+  all metrics within tolerance of pinned baseline
+```
+
+`run_example.py` writes `examples/service_transcript_v1.json` (lexical judge `1.0`).
+`run_hidden_rag.py` freezes exits `0,0,0,0,2,1` in `examples/hidden_rag/transcript_v1.json`.
+
+Interview pack: [docs/INTERVIEW.md](docs/INTERVIEW.md).
+Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
+
+## Category retrieve
+
+Retrieved chunks are evidence, not instructions. Poisoned "ignore previous instructions"
+text is dropped. No HTTP.
+
+| Category | Job |
+| --- | --- |
+| `support` | product FAQ |
+| `runbook` | ops steps |
+| `policy` | declared rules |
+| `docs` | library / CLI |
+
+Prompt packs live in `rag_eval_service.prompts` (short, labelled, no vendor copy).
+The fixture includes a poisoned support chunk so the drop path stays tested.
+
+## Contracts
 
 Teams often monitor HTTP availability but not the behavior behind the endpoint. A
 corpus replacement can invalidate old scores. A missing baseline can turn an eval
 command into an always-green script. An LLM judge can make CI depend on a provider.
-This service keeps those concerns separate and exposes each as a named contract.
 
 | Contract | Behavior | Named proof |
 | --- | --- | --- |
@@ -48,77 +100,6 @@ The Qdrant path uses a pinned 384-dimensional hashing embedder. That choice make
 the Compose path reproducible and free of model downloads. The adapter and embedder
 are separate, so a production embedding model can replace it without changing API
 or gate contracts.
-
-## Install
-
-Interview pack: [docs/INTERVIEW.md](docs/INTERVIEW.md).
-
-Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
-
-```bash
-git clone https://github.com/homayoun-safarpour/rag-eval-service
-cd rag-eval-service
-pip install -e ".[dev]"
-```
-
-Python 3.10 or newer is supported.
-
-## One-command offline path
-
-```bash
-python scripts/run_example.py
-python scripts/run_hidden_rag.py
-```
-
-The first command performs authenticated ingestion and query in-process. Its
-captured output is committed at `examples/service_transcript_v1.json`. It returns
-one chunk, the retrieved context, an extractive answer, and a lexical judge score
-of `1.0`. The second command runs four category asks plus a miss and an injection
-block; the frozen exits are `0,0,0,0,2,1` in `examples/hidden_rag/transcript_v1.json`.
-
-## Drop-in hidden RAG (other projects)
-
-Category-filtered retrieve. Retrieved chunks are evidence, not instructions.
-Poisoned "ignore previous instructions" text is dropped. No HTTP.
-
-| Category | Job |
-| --- | --- |
-| `support` | product FAQ |
-| `runbook` | ops steps |
-| `policy` | declared rules |
-| `docs` | library / CLI |
-
-```bash
-rag-eval hidden-ask --pack examples/hidden_rag/pack.json \
-  --query "When are refunds issued?" --category support
-# exit 0 grounded; 1 injection blocked; 2 no category match
-```
-
-```python
-from rag_eval_service.hidden import HiddenRAG
-
-rag = HiddenRAG()
-rag.load_pack("examples/hidden_rag/pack.json")
-result = rag.ask("When are refunds issued?", "support")
-# result.exit_code, result.answer, result.prompt
-```
-
-Prompt packs live in `rag_eval_service.prompts` (short, labelled, no vendor copy).
-The fixture includes a poisoned support chunk so the drop path stays tested.
-
-Run the frozen gate:
-
-```bash
-rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
-  --baseline examples/baseline_v1.json
-```
-
-Real output:
-
-```text
-verdict: PASS
-  all metrics within tolerance of pinned baseline
-```
 
 ## API
 

@@ -7,13 +7,13 @@ from dataclasses import dataclass
 
 # Public, well-known instruction-override shapes. Not an exploit catalogue.
 _INJECTION = re.compile(
-    r"(ignore (all )?(previous|prior|above) instructions"
-    r"|disregard (the )?(system|developer) prompt"
-    r"|you are now "
-    r"|new system prompt"
+    r"(ignore\s+(all\s+)?(previous|prior|above)\s+instructions"
+    r"|disregard\s+(the\s+)?(system|developer)\s+prompt"
+    r"|you\s+are\s+now\s+"
+    r"|new\s+system\s+prompt"
     r"|exfiltrate"
-    r"|do not follow the user"
-    r"|override (your )?safety)",
+    r"|do\s+not\s+follow\s+the\s+user"
+    r"|override\s+(your\s+)?safety)",
     re.IGNORECASE,
 )
 
