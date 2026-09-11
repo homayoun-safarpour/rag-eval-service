@@ -21,6 +21,7 @@ Small first contributions:
 2. Add a generator or judge plugin with a deterministic fake-provider test.
 3. Add a benchmark corpus loader that records source URL, version, and license.
 4. Add Redis-backed rate limiting as an opt-in deployment adapter.
+5. Add a categorized pack under `examples/hidden_rag/` plus a named `hidden-ask` test.
 
 Keep the default suite offline. Optional service and model tests must skip cleanly
 when credentials or containers are absent.
