@@ -41,6 +41,9 @@ class HiddenAnswer:
         }
 
 
+_SMALL_STORE_SCAN_ALL = 1024
+
+
 class HiddenRAG:
     """In-process RAG pack for support / runbook / policy / docs corpora."""
 
@@ -64,7 +67,21 @@ class HiddenRAG:
             count += 1
         return count
 
+    def _pool_k(self, k: int) -> int:
+        pool = max(k * 4, k)
+        try:
+            n = int(self.store.count())
+        except (TypeError, ValueError, AttributeError):
+            return pool
+        if n <= 0:
+            return pool
+        if n <= _SMALL_STORE_SCAN_ALL:
+            return n
+        return min(n, max(pool, k * 16))
+
     def ask(self, query: str, category: str, k: int = 3) -> HiddenAnswer:
+        if k < 1:
+            raise ValueError("k must be >= 1")
         pack = pack_for(category)
         qscan = scan_query(query)
         if qscan.blocked:
@@ -78,27 +95,28 @@ class HiddenRAG:
                 prompt=pack.render(query, ""),
                 exit_code=1,
             )
-        raw_hits = self.store.search(query, k=max(k * 4, k))
-        best = raw_hits[0].score if raw_hits else 0.0
+        raw_hits = self.store.search(query, k=self._pool_k(k))
+        dropped_in_category = 0
+        clean_hits: list[SearchResult] = []
+        for hit in raw_hits:
+            in_category = str(hit.metadata.get("category", "")).lower() == pack.category
+            if scan_text(hit.text).blocked:
+                if in_category:
+                    dropped_in_category += 1
+                continue
+            clean_hits.append(hit)
+        best = clean_hits[0].score if clean_hits else 0.0
         floor = max(0.05, 0.45 * best)
-        hits = [
+        kept = [
             hit
-            for hit in raw_hits
+            for hit in clean_hits
             if str(hit.metadata.get("category", "")).lower() == pack.category
             and hit.score >= floor
         ][:k]
-        kept: list[SearchResult] = []
-        dropped = 0
-        for hit in hits:
-            scan = scan_text(hit.text)
-            if scan.blocked:
-                dropped += 1
-                continue
-            kept.append(hit)
         if not kept:
             reason = (
                 "all_retrieved_chunks_blocked"
-                if dropped
+                if dropped_in_category
                 else "no_category_match_or_empty_retrieve"
             )
             return HiddenAnswer(
@@ -106,10 +124,10 @@ class HiddenRAG:
                 query=query,
                 answer="",
                 contexts=[],
-                blocked=dropped > 0,
+                blocked=dropped_in_category > 0,
                 reason=reason,
                 prompt=pack.render(query, ""),
-                exit_code=1 if dropped else 2,
+                exit_code=1 if dropped_in_category else 2,
             )
         evidence = "\n\n".join(item.text for item in kept)
         answer = self._generator.generate(query, kept)
