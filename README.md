@@ -1,4 +1,4 @@
-﻿# rag-eval-service
+# rag-eval-service
 
 **A RAG endpoint can stay healthy while retrieval quality, corpus identity, and answer grounding fail. This service turns those failures into tested API and CI contracts.**
 
@@ -26,6 +26,7 @@ This service keeps those concerns separate and exposes each as a named contract.
 | Metric floor | A drop below the frozen floor returns exit `2` | `test_check_detects_regression_below_floor` |
 | API access | Protected routes reject a missing or wrong key | `test_api_key_protects_mutating_and_query_routes` |
 | Request controls | Oversized and over-rate requests return `413` and `429` | `test_request_size_limit_fails_before_handler`, `test_rate_limit_returns_429` |
+| Hidden RAG | Category retrieve; instruction-shaped chunks dropped | `test_hidden_rag_blocks_poisoned_chunk_and_still_answers` |
 
 ## Architecture
 
@@ -38,6 +39,9 @@ POST /query  -> retrieve -> extractive generator -> lexical judge
 
 rag-eval check -> hit@k + MRR + context precision + grounding
                -> corpus_sha256 + frozen floors -> exit 0 / 2
+
+rag-eval hidden-ask -> category filter -> injection scan -> extractive answer
+                    -> exit 0 grounded / 1 blocked / 2 no match
 ```
 
 The Qdrant path uses a pinned 384-dimensional hashing embedder. That choice makes
@@ -63,11 +67,44 @@ Python 3.10 or newer is supported.
 
 ```bash
 python scripts/run_example.py
+python scripts/run_hidden_rag.py
 ```
 
-The command performs authenticated ingestion and query in-process. Its captured
-output is committed at `examples/service_transcript_v1.json`. It returns one chunk,
-the retrieved context, an extractive answer, and a lexical judge score of `1.0`.
+The first command performs authenticated ingestion and query in-process. Its
+captured output is committed at `examples/service_transcript_v1.json`. It returns
+one chunk, the retrieved context, an extractive answer, and a lexical judge score
+of `1.0`. The second command runs four category asks plus a miss and an injection
+block; the frozen exits are `0,0,0,0,2,1` in `examples/hidden_rag/transcript_v1.json`.
+
+## Drop-in hidden RAG (other projects)
+
+Category-filtered retrieve. Retrieved chunks are evidence, not instructions.
+Poisoned "ignore previous instructions" text is dropped. No HTTP.
+
+| Category | Job |
+| --- | --- |
+| `support` | product FAQ |
+| `runbook` | ops steps |
+| `policy` | declared rules |
+| `docs` | library / CLI |
+
+```bash
+rag-eval hidden-ask --pack examples/hidden_rag/pack.json \
+  --query "When are refunds issued?" --category support
+# exit 0 grounded; 1 injection blocked; 2 no category match
+```
+
+```python
+from rag_eval_service.hidden import HiddenRAG
+
+rag = HiddenRAG()
+rag.load_pack("examples/hidden_rag/pack.json")
+result = rag.ask("When are refunds issued?", "support")
+# result.exit_code, result.answer, result.prompt
+```
+
+Prompt packs live in `rag_eval_service.prompts` (short, labelled, no vendor copy).
+The fixture includes a poisoned support chunk so the drop path stays tested.
 
 Run the frozen gate:
 

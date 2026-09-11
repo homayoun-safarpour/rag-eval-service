@@ -1,5 +1,8 @@
-"""RAG evaluation metrics and regression gate for retrieval quality."""
+"""RAG evaluation metrics, hidden drop-in retrieve, and regression gates."""
 
 from __future__ import annotations
 
-__version__ = "0.2.0"
+from rag_eval_service.hidden import HiddenAnswer, HiddenRAG
+
+__all__ = ["HiddenAnswer", "HiddenRAG"]
+__version__ = "0.3.0"

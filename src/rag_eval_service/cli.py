@@ -15,7 +15,9 @@ from rag_eval_service.baseline import (
     load_baseline,
     write_baseline,
 )
+from rag_eval_service.hidden import HiddenRAG
 from rag_eval_service.metrics import evaluate_cases
+from rag_eval_service.prompts import CATEGORIES
 from rag_eval_service.store import VectorStore
 
 
@@ -63,7 +65,35 @@ def main(argv: list[str] | None = None) -> int:  # noqa: PLR0915
     bench.add_argument("--k", type=int, default=3)
     bench.add_argument("--runs", type=int, default=100)
 
+    hidden = sub.add_parser(
+        "hidden-ask",
+        help="drop-in categorized RAG; retrieved text is evidence, not instructions",
+    )
+    hidden.add_argument("--pack", required=True, help="JSON docs with id, text, category")
+    hidden.add_argument("--query", required=True)
+    hidden.add_argument(
+        "--category",
+        required=True,
+        choices=list(CATEGORIES),
+    )
+    hidden.add_argument("--k", type=int, default=3)
+    hidden.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
+    if args.cmd == "hidden-ask":
+        rag = HiddenRAG()
+        rag.load_pack(args.pack)
+        result = rag.ask(args.query, args.category, k=args.k)
+        if args.json:
+            print(json.dumps(result.to_dict(), indent=2))
+        else:
+            print(f"category={result.category} exit={result.exit_code} blocked={result.blocked}")
+            if result.reason:
+                print(f"reason={result.reason}")
+            if result.answer:
+                print(result.answer)
+        return result.exit_code
+
     corpus = _load_json(args.corpus)
     cases = _load_json(args.cases)["cases"]
     store = _store_from_corpus(corpus)

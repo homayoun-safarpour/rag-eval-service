@@ -38,6 +38,7 @@ Two-minute path:
 ```bash
 pip install -e ".[dev]"
 python scripts/run_example.py
+python scripts/run_hidden_rag.py
 rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
   --baseline examples/baseline_v1.json
 pytest -q
@@ -55,9 +56,9 @@ do not capture semantic equivalence as well as a fitted dense embedding model.
 - [x] W5 Add API key, request bounds, structured logs, liveness, and readiness.
 - [x] W6 Add non-root image, Compose topology, and CI container gate.
 - [x] W7 Run public-doc benchmark, update docs, tests, and interview evidence.
+- [x] W8 Drop-in hidden RAG: categories support/runbook/policy/docs, distilled prompts, injection scan, CLI `hidden-ask` exit 0/1/2 (2026-09-11)
 
-**NEXT TICK:** Replace hashing embeddings only when a pinned labeled benchmark
-shows a candidate dense model improves recall enough to justify its runtime cost.
+**NEXT TICK:** Wire HiddenRAG into a second face repo as a library import, or keep hashing embeddings until a pinned dense-model benchmark beats recall enough to pay the runtime cost.
 
 Remaining red checks: none for the accepted `rag-production` scope. Hosted service
 and field-leaderboard claims remain deliberately out of scope.
