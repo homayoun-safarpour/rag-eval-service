@@ -194,6 +194,24 @@ def test_readme_locks_hidden_ask_contract():
     assert "`policy`" in readme and "`docs`" in readme
 
 
+def test_readme_first_screen_matches_top100_craft():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert readme.lstrip().startswith("# rag-eval\n")
+    pip_at = readme.find("pip install")
+    check_at = readme.find("rag-eval check")
+    interview_at = readme.find("Interview pack")
+    contracts_at = readme.find("## Contracts")
+    architecture_at = readme.find("## Architecture")
+    assert 0 <= pip_at < check_at < interview_at
+    assert pip_at < contracts_at
+    assert pip_at < architecture_at
+    head = "\n".join(readme.splitlines()[:28])
+    assert "Frozen RAG eval gates and in-process categorized retrieve with injection drop." in head
+    assert "verdict: PASS" in head
+    assert "Interview pack" not in head
+    assert "## Contracts" not in head
+
+
 def test_package_exports_hidden_rag():
     rag = PackagedHiddenRAG()
     assert rag.load_pack(PACK) == 9
