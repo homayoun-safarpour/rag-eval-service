@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "rag-eval-service"
 version = "0.3.0"
-description = "RAG ingestion, retrieval, generation, evaluation, and frozen regression gates."
+description = "Frozen RAG eval gates and in-process categorized retrieve with injection drop."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

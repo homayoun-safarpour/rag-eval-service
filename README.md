@@ -7,14 +7,16 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 Frozen RAG eval gates and in-process categorized retrieve with injection drop.
-Repo slug `rag-eval-service`. CLI `rag-eval`. Python 3.10+.
 
 ```bash
-git clone https://github.com/homayoun-safarpour/rag-eval-service
-cd rag-eval-service
 pip install -e ".[dev]"
-python scripts/run_example.py
-python scripts/run_hidden_rag.py
+rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
+  --baseline examples/baseline_v1.json
+```
+
+```text
+verdict: PASS
+  all metrics within tolerance of pinned baseline
 ```
 
 ```bash
@@ -31,22 +33,6 @@ rag.load_pack("examples/hidden_rag/pack.json")
 result = rag.ask("When are refunds issued?", "support")
 # result.exit_code, result.answer, result.prompt
 ```
-
-```bash
-rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
-  --baseline examples/baseline_v1.json
-```
-
-```text
-verdict: PASS
-  all metrics within tolerance of pinned baseline
-```
-
-`run_example.py` writes `examples/service_transcript_v1.json` (lexical judge `1.0`).
-`run_hidden_rag.py` freezes exits `0,0,0,0,2,1` in `examples/hidden_rag/transcript_v1.json`.
-
-Interview pack: [docs/INTERVIEW.md](docs/INTERVIEW.md).
-Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
 
 ## Category retrieve
 
@@ -223,6 +209,22 @@ See `CONTRIBUTING.md` for bounded extension tasks.
 ## Field alignment
 
 Ireland AI-first QA language (golden floors, drift, offline eval) maps to `rag-eval check` exit codes. Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
+
+## Docs
+
+Interview pack: [docs/INTERVIEW.md](docs/INTERVIEW.md).
+Claim boundaries: [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
+
+`run_example.py` writes `examples/service_transcript_v1.json` (lexical judge `1.0`).
+`run_hidden_rag.py` freezes exits `0,0,0,0,2,1` in `examples/hidden_rag/transcript_v1.json`.
+
+```bash
+git clone https://github.com/homayoun-safarpour/rag-eval-service
+cd rag-eval-service
+pip install -e ".[dev]"
+python scripts/run_example.py
+python scripts/run_hidden_rag.py
+```
 
 ## License
 
