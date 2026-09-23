@@ -206,6 +206,7 @@ def test_readme_first_screen_matches_top100_craft():
     assert pip_at < contracts_at
     assert pip_at < architecture_at
     head = "\n".join(readme.splitlines()[:28])
+    assert "git clone https://github.com/homayoun-safarpour/rag-eval-service" in head
     assert "Frozen RAG eval gates and in-process categorized retrieve with injection drop." in head
     assert "verdict: PASS" in head
     assert "Interview pack" not in head

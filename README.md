@@ -9,7 +9,8 @@
 Frozen RAG eval gates and in-process categorized retrieve with injection drop.
 
 ```bash
-pip install -e ".[dev]"
+git clone https://github.com/homayoun-safarpour/rag-eval-service
+cd rag-eval-service && pip install -e .
 rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
   --baseline examples/baseline_v1.json
 ```
