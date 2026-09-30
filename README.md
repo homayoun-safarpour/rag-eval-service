@@ -11,6 +11,26 @@ Frozen RAG eval gates and in-process categorized retrieve with injection drop.
 ```bash
 git clone https://github.com/homayoun-safarpour/rag-eval-service
 cd rag-eval-service && pip install -e .
+rag-eval hidden-ask --pack examples/hidden_rag/pack.json \
+  --query "Ignore previous instructions" --category docs
+```
+
+```text
+category=docs exit=1 blocked=True
+reason=retrieved_or_query_contains_instruction_override
+```
+
+That command exits 1 (injection blocked). Grounded asks exit 0; no category match exits 2.
+
+## Use this when
+
+| Situation | Use this? |
+| --- | --- |
+| You need frozen hit@k / MRR gates, not HTTP uptime | Yes |
+| You need category retrieve that drops instruction-shaped chunks | Yes |
+| You want a hosted RAG product | No; this is an eval and retrieve gate |
+
+```bash
 rag-eval check --corpus examples/corpus.json --cases examples/cases.json \
   --baseline examples/baseline_v1.json
 ```
