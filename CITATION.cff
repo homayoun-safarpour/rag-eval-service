@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "rag-eval-service"
+type: software
+authors:
+  - family-names: Safarpour
+    given-names: Homayoun
+    affiliation: "University of Limerick"
+repository-code: "https://github.com/homayoun-safarpour/rag-eval-service"
+url: "https://homayoun-safarpour.github.io"
+license: MIT
+version: "0.3.0"
+abstract: "Frozen RAG eval gates and in-process categorized retrieve with injection drop."
+keywords:
+  - "evaluation"
+  - "python"
+  - "qdrant"
+  - "rag"
+  - "retrieval"

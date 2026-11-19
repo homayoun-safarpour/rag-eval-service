@@ -1,4 +1,4 @@
-# Reliability card — rag-eval-service
+# Reliability card: rag-eval-service
 
 | Field | Value |
 | --- | --- |
