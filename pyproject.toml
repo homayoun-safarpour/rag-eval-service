@@ -9,7 +9,7 @@ description = "Frozen RAG eval gates and in-process categorized retrieve with in
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Homayoun Safarpour", email = "homayoun.safarpour@gmail.com" }]
+authors = [{ name = "Homayoun Safarpour", email = "129149267+homayoun-safarpour@users.noreply.github.com" }]
 keywords = [
     "rag",
     "evaluation",
