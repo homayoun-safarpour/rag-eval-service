@@ -142,6 +142,7 @@ A committed fixture of 12 documents and eight queries from pinned public documen
 - It is not a hosted RAG product or a vector database. It is an eval gate and a small retriever.
 - The hashing embedder gives lexical features, not learned semantic similarity, so paraphrased queries can miss.
 - The injection scan is a fixed list of patterns and does not catch every injection.
+- The scan does not catch task tampering: a chunk that quietly changes a fact, such as a refund limit, with no instruction words passes it. See "Beyond Instruction Override: Benchmarking Indirect Prompt Injection with Task-Tampering Attacks" ([arXiv:2611.07640](https://arxiv.org/abs/2611.07640)); `tests/test_hidden_rag.py::test_claim_limit_task_tampering_not_caught` pins this limit.
 - The lexical judge measures token support, not factual correctness.
 - On the command line, a missing baseline file stops `rag-eval check` with a file error (exit 1).
 
