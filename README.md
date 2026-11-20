@@ -24,6 +24,10 @@ reason=retrieved_or_query_contains_instruction_override
 
 That command exits 1 because the query is an instruction override. It runs offline, with no server and no model download. With `--query "When are refunds issued?" --category support` it exits 0.
 
+![rag-eval-service: query + retrieved chunks is checked by instruction-override patterns; the result is BLOCKED with exit 1](docs/readme-flow.svg)
+
+[How it works](#how-it-works) · [Results](#what-each-result-means) · [Limits](#limits) · Part of [a small open stack for checking AI agents and their judges](https://homayoun-safarpour.github.io)
+
 ## What each result means
 
 | Command | Result | Exit | Meaning |

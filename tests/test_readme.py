@@ -32,7 +32,7 @@ def test_readme_first_screen_locks_command_and_output():
     assert FIRST_OUTPUT in head + "\n"
     assert "verdict: PASS" not in head
     assert "Interview pack" not in head
-    assert "—" not in README
+    assert "\u2014" not in README
 
 
 def test_readme_first_command_prints_the_shown_output(capsys):
