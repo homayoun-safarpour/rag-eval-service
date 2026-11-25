@@ -35,9 +35,12 @@ That command exits 1 because the query is an instruction override. It runs offli
 | `check` | `PASS` | 0 | Every metric is within the tolerance of its pinned value, and the corpus fingerprint matches. |
 | `check` | `REGRESSION` | 2 | At least one metric fell below its floor. |
 | `check` | `CORPUS_DRIFT` | 2 | The corpus changed since the freeze, so the old scores no longer apply. |
+| `check` | `CASES_DRIFT` | 2 | The cases file or `--k` differs from the one the baseline was frozen on, so the scores cannot be compared. |
+| `check` | `INVALID_BASELINE` | 2 | The baseline is malformed: a missing field, a non-finite number, a value outside 0 to 1, or no pin of the cases and k. |
 | `hidden-ask` | `blocked=False` | 0 | The answer comes from clean chunks of the requested category. |
 | `hidden-ask` | `blocked=True` | 1 | The query holds instruction-override text, or no clean chunk remained. |
 | `hidden-ask` | `blocked=False` | 2 | No chunk of that category passed the score floor. |
+| any | `error: ...` | 3 | The command line or an input file is invalid, so nothing was checked. |
 
 A `PASS` shows that retrieval on the labelled cases has not fallen below the frozen floors on the same corpus. It does not show that the answers are correct. Claim limits are in [docs/RELIABILITY_CARD.md](docs/RELIABILITY_CARD.md).
 
@@ -58,8 +61,8 @@ Teams often monitor HTTP availability but not the behaviour behind the endpoint.
 ## How it works
 
 1. `rag-eval evaluate` scores labelled cases (hit@k, MRR, context precision and a lexical grounding proxy) with no model calls.
-2. `rag-eval freeze` writes a baseline with those scores, a tolerance and the sha256 fingerprint of the corpus.
-3. `rag-eval check` scores the cases again and exits 0 or 2.
+2. `rag-eval freeze` writes a baseline with those scores, a tolerance, the sha256 fingerprints of the corpus and the cases, the number of cases and `k`.
+3. `rag-eval check` scores the same cases again at the pinned `k` and exits 0 or 2. Other cases or another `--k` give `CASES_DRIFT`.
 4. `rag-eval hidden-ask`, or `HiddenRAG` in Python, filters by category (`support`, `runbook`, `policy`, `docs`), drops instruction-shaped text and returns an extractive answer.
 
 ```bash
@@ -82,7 +85,7 @@ verdict: REGRESSION
 ```bash
 rag-eval hidden-ask --pack examples/hidden_rag/pack.json \
   --query "When are refunds issued?" --category support
-# exit 0 grounded; 1 injection blocked; 2 no category match
+# exit 0 grounded; 1 injection blocked; 2 no category match; 3 input error
 ```
 
 ```text
@@ -116,6 +119,9 @@ Interview pack: [docs/INTERVIEW.md](docs/INTERVIEW.md), talking points backed by
 | Contract | Named test |
 | --- | --- |
 | A changed corpus returns `CORPUS_DRIFT` | `test_check_refuses_when_corpus_fingerprint_mismatches` |
+| Other cases or another `--k` return `CASES_DRIFT` | `test_check_refuses_cases_without_answers_and_other_k` |
+| A NaN in the baseline returns `INVALID_BASELINE` | `test_nan_tolerance_in_baseline_is_refused` |
+| With no `RAG_API_KEY`, protected routes return `503` | `test_api_refuses_protected_routes_when_no_key_is_configured` |
 | A drop below the frozen floor returns exit `2` | `test_check_detects_regression_below_floor` |
 | No baseline returns `MISSING_BASELINE` (library) | `test_check_fails_closed_when_baseline_is_missing` |
 | A poisoned chunk is dropped and the clean answer remains | `test_hidden_rag_blocks_poisoned_chunk_and_still_answers` |
@@ -131,7 +137,7 @@ POST /query  -> retrieve -> extractive generator -> lexical judge (LLM optional)
 
 ## Run it as a service
 
-`python scripts/run_example.py` runs the app inside a local test client, ingests one document and prints the `/query` result with a lexical score of `1.0`. To serve over HTTP, run `RAG_API_KEY=replace-me uvicorn rag_eval_service.app:app --port 8000`; `/health` checks the process and `/ready` checks the vector store. `docker compose up --build` adds a persistent `qdrant/qdrant:v1.15.3` store. Settings and the optional LLM generator and judge are read from `RAG_*` and `QDRANT_*` environment variables, and a missing LLM key returns `503` instead of an unreported lexical score.
+`python scripts/run_example.py` runs the app inside a local test client, ingests one document and prints the `/query` result with a lexical score of `1.0`. To serve over HTTP, run `RAG_API_KEY=replace-me uvicorn rag_eval_service.app:app --port 8000`. Without `RAG_API_KEY`, `/ingest`, `/query`, `/evaluate` and `/check` return `503`, unless you set `RAG_ALLOW_NO_AUTH=1` on purpose. A request body over `RAG_MAX_REQUEST_BYTES` returns `413`, also when it is sent in chunks. `/health` checks the process and `/ready` checks the vector store. `docker compose up --build` adds a persistent `qdrant/qdrant:v1.15.3` store. Settings and the optional LLM generator and judge are read from `RAG_*` and `QDRANT_*` environment variables, and a missing LLM key returns `503` instead of an unreported lexical score.
 
 ## Benchmark and CI
 

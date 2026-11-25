@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
+from rag_eval_service.baseline import cases_fingerprint
 from rag_eval_service.store import VectorStoreProtocol, tokenize
 
 
@@ -26,10 +27,14 @@ class EvalReport:
     mrr: float
     context_precision: float
     faithfulness_proxy: float
+    k: int = 0
+    cases_sha256: str = ""
 
     def to_dict(self) -> dict:
         return {
             "n_cases": len(self.cases),
+            "k": self.k,
+            "cases_sha256": self.cases_sha256,
             "hit_at_k": self.hit_at_k,
             "mrr": self.mrr,
             "context_precision": self.context_precision,
@@ -102,4 +107,6 @@ def evaluate_cases(
         mrr=sum(r.mrr for r in results) / n,
         context_precision=sum(r.context_precision for r in results) / n,
         faithfulness_proxy=sum(r.faithfulness_proxy for r in results) / n,
+        k=k,
+        cases_sha256=cases_fingerprint(cases),
     )

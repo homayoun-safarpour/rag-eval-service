@@ -32,8 +32,43 @@ def _store_from_corpus(corpus: dict) -> VectorStore:
     return store
 
 
+EXIT_INPUT_ERROR = 3
+
+
+class _Parser(argparse.ArgumentParser):
+    """Usage errors exit 3, so they never read as a REGRESSION or a no-match (2)."""
+
+    def error(self, message: str):  # type: ignore[override]
+        self.print_usage(sys.stderr)
+        self.exit(EXIT_INPUT_ERROR, f"{self.prog}: error: {message}\n")
+
+
+def _pinned_k(baseline: object) -> int:
+    k = baseline.get("k") if isinstance(baseline, dict) else None
+    return k if isinstance(k, int) and not isinstance(k, bool) and k >= 1 else 3
+
+
+def _hidden_ask(args: argparse.Namespace) -> int:
+    try:
+        rag = HiddenRAG()
+        rag.load_pack(args.pack)
+        result = rag.ask(args.query, args.category, k=args.k)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_INPUT_ERROR
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2))
+    else:
+        print(f"category={result.category} exit={result.exit_code} blocked={result.blocked}")
+        if result.reason:
+            print(f"reason={result.reason}")
+        if result.answer:
+            print(result.answer)
+    return result.exit_code
+
+
 def main(argv: list[str] | None = None) -> int:  # noqa: PLR0915
-    parser = argparse.ArgumentParser(
+    parser = _Parser(
         prog="rag-eval",
         description="Score RAG retrieval fixtures and gate on a frozen baseline.",
     )
@@ -56,7 +91,7 @@ def main(argv: list[str] | None = None) -> int:  # noqa: PLR0915
     ch.add_argument("--corpus", required=True)
     ch.add_argument("--cases", required=True)
     ch.add_argument("--baseline", required=True)
-    ch.add_argument("--k", type=int, default=3)
+    ch.add_argument("--k", type=int, default=None, help="defaults to the k pinned in the baseline")
 
     bench = sub.add_parser("benchmark", help="run a pinned retrieval benchmark")
     bench.add_argument("--corpus", required=True)
@@ -81,22 +116,14 @@ def main(argv: list[str] | None = None) -> int:  # noqa: PLR0915
 
     args = parser.parse_args(argv)
     if args.cmd == "hidden-ask":
-        rag = HiddenRAG()
-        rag.load_pack(args.pack)
-        result = rag.ask(args.query, args.category, k=args.k)
-        if args.json:
-            print(json.dumps(result.to_dict(), indent=2))
-        else:
-            print(f"category={result.category} exit={result.exit_code} blocked={result.blocked}")
-            if result.reason:
-                print(f"reason={result.reason}")
-            if result.answer:
-                print(result.answer)
-        return result.exit_code
+        return _hidden_ask(args)
 
     corpus = _load_json(args.corpus)
     cases = _load_json(args.cases)["cases"]
     store = _store_from_corpus(corpus)
+    baseline = load_baseline(args.baseline) if args.cmd == "check" else None
+    if args.k is None:
+        args.k = _pinned_k(baseline)
     started = time.perf_counter()
     report = evaluate_cases(store, cases, k=args.k)
     elapsed = time.perf_counter() - started
@@ -151,7 +178,6 @@ def main(argv: list[str] | None = None) -> int:  # noqa: PLR0915
         print(f"wrote benchmark -> {args.out}")
         return 0
 
-    baseline = load_baseline(args.baseline)
     verdict = check_against_baseline(payload, store.docs, baseline)
     print(f"verdict: {verdict.status}")
     print(f"  {verdict.detail}")
