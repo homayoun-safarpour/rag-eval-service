@@ -16,6 +16,7 @@ from rag_eval_service.store import VectorStore
 
 ROOT = Path(__file__).resolve().parents[1]
 EX = ROOT / "examples"
+TEST_AUTH_TOKEN = "test-token"
 
 
 def _load_fixtures():
@@ -69,13 +70,13 @@ def test_check_fails_closed_when_baseline_is_missing():
 
 
 def test_fastapi_evaluate_and_health():
-    client = TestClient(create_app(Settings(api_key="test-token")))
+    client = TestClient(create_app(Settings(api_key=TEST_AUTH_TOKEN)))
     assert client.get("/health").json()["status"] == "ok"
     corpus = json.loads((EX / "corpus.json").read_text(encoding="utf-8"))
     cases = json.loads((EX / "cases.json").read_text(encoding="utf-8"))
     resp = client.post(
         "/evaluate",
-        headers={"x-api-key": "test-token"},
+        headers={"x-api-key": TEST_AUTH_TOKEN},
         json={"docs": corpus["docs"], "cases": cases["cases"], "k": 2},
     )
     assert resp.status_code == 200
