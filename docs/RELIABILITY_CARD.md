@@ -3,8 +3,8 @@
 | Field | Value |
 | --- | --- |
 | **Job** | Fail-closed API + CI contracts for RAG retrieval quality and corpus identity; drop-in hidden RAG for other projects |
-| **Primary metrics** | hit@k, MRR, context precision, grounding; `corpus_sha256` floors; hidden-ask exit 0/1/2 |
-| **Named failures** | `CORPUS_DRIFT`, regression below frozen floors (exit `2`), injection blocked (hidden-ask exit `1`) |
+| **Primary metrics** | hit@k, MRR, context precision, grounding; `corpus_sha256` and `cases_sha256` pins; hidden-ask exit 0/1/2 (3 for an input error) |
+| **Named failures** | `CORPUS_DRIFT`, `CASES_DRIFT`, `INVALID_BASELINE`, regression below frozen floors (exit `2`), injection blocked (hidden-ask exit `1`) |
 | **Claim** | HTTP health is not retrieval health; corpus swaps invalidate old scores; retrieved chunks cannot override the task |
 | **Not claimed** | Replaces production vector DB ops; default path needs no paid LLM; prompt filters catch every injection; the scan catches task tampering (a chunk that quietly changes a fact, such as a refund limit, with no instruction words), see "Beyond Instruction Override: Benchmarking Indirect Prompt Injection with Task-Tampering Attacks", arXiv:2611.07640 |
 

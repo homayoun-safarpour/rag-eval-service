@@ -130,8 +130,9 @@ def test_optional_llm_path_fails_explicitly_without_configuration(monkeypatch):
     monkeypatch.delenv("RAG_LLM_MODEL", raising=False)
     store = InMemoryVectorStore()
     store.upsert("one", "A grounded context.")
-    response = TestClient(create_app(Settings(), store)).post(
+    response = TestClient(create_app(Settings(api_key=TEST_AUTH_TOKEN), store)).post(
         "/query",
+        headers={"x-api-key": TEST_AUTH_TOKEN},
         json={"query": "What is grounded?", "generator": "llm"},
     )
     assert response.status_code == 503

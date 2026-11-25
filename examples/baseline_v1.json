@@ -1,7 +1,10 @@
 {
-  "version": 1,
+  "version": 2,
   "tolerance": 0.05,
   "corpus_sha256": "5af4602093823da67103c746d0cb6fcd3b17f529f7889a95b0d58d0fe7407513",
+  "cases_sha256": "65a70c8acb0c3a73d90a74ee2039ee7ca7d95037cdbc376a5643c082256ba658",
+  "n_cases": 4,
+  "k": 3,
   "metrics": {
     "hit_at_k": 1.0,
     "mrr": 1.0,

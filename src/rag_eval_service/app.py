@@ -33,6 +33,7 @@ if not logger.handlers:
 @dataclass(frozen=True)
 class Settings:
     api_key: str = ""
+    allow_no_auth: bool = False
     max_request_bytes: int = 1_000_000
     requests_per_minute: int = 120
     max_documents: int = 100
@@ -44,6 +45,7 @@ class Settings:
     def from_env(cls) -> Settings:
         return cls(
             api_key=os.getenv("RAG_API_KEY", ""),
+            allow_no_auth=os.getenv("RAG_ALLOW_NO_AUTH", "") == "1",
             max_request_bytes=int(os.getenv("RAG_MAX_REQUEST_BYTES", "1000000")),
             requests_per_minute=int(os.getenv("RAG_REQUESTS_PER_MINUTE", "120")),
             max_documents=int(os.getenv("RAG_MAX_DOCUMENTS", "100")),
@@ -154,9 +156,26 @@ def create_app(  # noqa: PLR0915
     )
     api.state.store = store
     api.state.settings = settings
+    if not settings.api_key:
+        logger.warning(
+            json.dumps(
+                {
+                    "event": "api_key_not_configured",
+                    "protected_routes": "open" if settings.allow_no_auth else "refused_503",
+                },
+                sort_keys=True,
+            )
+        )
 
     def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
-        if settings.api_key and (
+        if not settings.api_key:
+            if settings.allow_no_auth:
+                return
+            raise HTTPException(
+                status_code=503,
+                detail="no API key configured; set RAG_API_KEY (or RAG_ALLOW_NO_AUTH=1)",
+            )
+        if (
             x_api_key is None or not secrets.compare_digest(x_api_key, settings.api_key)
         ):
             raise HTTPException(status_code=401, detail="invalid or missing API key")
@@ -164,8 +183,15 @@ def create_app(  # noqa: PLR0915
     @api.middleware("http")
     async def hardening_middleware(request: Request, call_next):
         request_id = request.headers.get("x-request-id", str(uuid.uuid4()))
-        content_length = int(request.headers.get("content-length", "0") or "0")
-        if content_length > settings.max_request_bytes:
+        header_length = request.headers.get("content-length")
+        try:
+            content_length = int(header_length) if header_length else None
+        except ValueError:
+            return _json_response(400, {"detail": "invalid content-length"}, request_id)
+        if content_length is None and request.method in {"POST", "PUT", "PATCH"}:
+            # A chunked body has no Content-Length, so measure the bytes read.
+            content_length = len(await request.body())
+        if (content_length or 0) > settings.max_request_bytes:
             return _json_response(413, {"detail": "request body too large"}, request_id)
 
         client = request.client.host if request.client else "unknown"
