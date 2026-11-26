@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -124,6 +125,24 @@ class QueryRequest(BaseModel):
     judge: str = Field(default="lexical", pattern="^(lexical|llm)$")
 
 
+def _validation_details(exc: RequestValidationError) -> list[dict[str, Any]]:
+    """Return valid text diagnostics without echoing raw input or context."""
+    def safe_text(value: str) -> str:
+        return value.encode("utf-8", errors="replace").decode("utf-8")
+
+    return [
+        {
+            "type": safe_text(error["type"]),
+            "loc": [
+                safe_text(part) if isinstance(part, str) else part
+                for part in error["loc"]
+            ],
+            "msg": safe_text(error["msg"]),
+        }
+        for error in exc.errors()
+    ]
+
+
 def _build_store(docs: list[DocIn]) -> InMemoryVectorStore:
     store = InMemoryVectorStore()
     for d in docs:
@@ -156,6 +175,13 @@ def create_app(  # noqa: PLR0915
     )
     api.state.store = store
     api.state.settings = settings
+
+    @api.exception_handler(RequestValidationError)
+    async def validation_error_handler(
+        _request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=422, content={"detail": _validation_details(exc)})
+
     if not settings.api_key:
         logger.warning(
             json.dumps(
